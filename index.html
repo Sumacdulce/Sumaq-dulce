@@ -18,10 +18,94 @@
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwgLUz9w7x-if-KP5nrYV4WdP9e88SHHW2aKCnblomrPfgcxU_gkFU5944YNVcLJDgILA/exec";
 const KEY="sumaq_dulce_opiniones";
-const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-function local(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return[]}}
-function render(a){const x=document.getElementById("reviews");if(!a.length){x.innerHTML='<div class="card small" style="text-align:center">Todavía no hay opiniones. ¡Sé el primero! 💕</div>';return}x.innerHTML=a.map(r=>`<article class="review"><div class="top"><b>${esc(r.name||"Cliente")}</b><span class="stars">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</span></div><div class="small">${esc(r.product||"Carlota")} · ${esc(r.date||"")}</div><p>${esc(r.comment)}</p></article>`).join("")}
-async function load(){if(!API_URL){render(local());return}try{render(await (await fetch(API_URL)).json())}catch(e){render(local())}}
-document.getElementById("form").onsubmit=async e=>{e.preventDefault();const item={name:name.value.trim(),product:product.value,rating:+document.querySelector('input[name=rating]:checked').value,comment:comment.value.trim()};if(!item.comment)return;try{if(API_URL){let r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(item)});if(!r.ok)throw 0}else{let a=local();a.unshift({...item,date:new Date().toLocaleDateString("es-PE")});localStorage.setItem(KEY,JSON.stringify(a))}status.textContent="🎉 ¡Gracias! Tu opinión fue publicada.";status.style.display="block";e.target.reset();s5.checked=true;load();setTimeout(()=>status.style.display="none",3500)}catch(err){status.textContent="No se pudo publicar. Revisa la configuración.";status.style.display="block"}};
+
+const form=document.getElementById("form");
+const nameInput=document.getElementById("name");
+const productInput=document.getElementById("product");
+const commentInput=document.getElementById("comment");
+const reviews=document.getElementById("reviews");
+
+function local(){
+  try{
+    return JSON.parse(localStorage.getItem(KEY)||"[]");
+  }catch(e){
+    return [];
+  }
+}
+
+function render(list){
+  if(!list.length){
+    reviews.innerHTML='<div class="card small" style="text-align:center">Todavía no hay opiniones. ¡Sé el primero!</div>';
+    return;
+  }
+
+  reviews.innerHTML=list.map(x=>`
+    <div class="card">
+      <b>${x.name||"Cliente"}</b>
+      <div>${"⭐".repeat(Number(x.rating)||5)}</div>
+      <small>${x.product||"Carlota"}</small>
+      <p>${x.comment||""}</p>
+    </div>
+  `).join("");
+}
+
+async function load(){
+  if(!API_URL){
+    render(local());
+    return;
+  }
+
+  try{
+    const r=await fetch(API_URL);
+    const data=await r.json();
+    render(data);
+  }catch(e){
+    render(local());
+  }
+}
+
+form.addEventListener("submit",async function(e){
+  e.preventDefault();
+
+  const item={
+    name:nameInput.value.trim() || "Cliente",
+    product:productInput.value,
+    rating:Number(document.querySelector('input[name="rating"]:checked')?.value || 5),
+    comment:commentInput.value.trim()
+  };
+
+  if(!item.comment){
+    alert("Escribe una opinión antes de enviarla.");
+    return;
+  }
+
+  try{
+    if(API_URL){
+      const response=await fetch(API_URL,{
+        method:"POST",
+        headers:{
+          "Content-Type":"text/plain;charset=utf-8"
+        },
+        body:JSON.stringify(item)
+      });
+
+      if(!response.ok) throw new Error("Error al enviar");
+    }
+
+    const saved=local();
+    saved.unshift(item);
+    localStorage.setItem(KEY,JSON.stringify(saved));
+
+    form.reset();
+    alert("¡Opinión enviada! ❤️");
+    load();
+
+  }catch(error){
+    alert("No se pudo enviar la opinión. Inténtalo nuevamente.");
+    console.error(error);
+  }
+});
+
 load();
-</script></body></html>
+</script>
+</body></html>
