@@ -16,7 +16,7 @@
 <label>Tu comentario</label><textarea id="comment" maxlength="500" required placeholder="¿Qué te pareció nuestra Carlota?"></textarea><button>💗 Publicar mi opinión</button></form><div id="status" class="status"></div></div></section>
 <section id="opiniones"><h2>💬 Opiniones de nuestros clientes</h2><div id="reviews" class="reviews"></div></section></div><footer>© Sumaq Dulce · Carlota hecha con cariño 💕</footer>
 <script>
-const API_URL="";
+const API_URL="https://script.google.com/macros/s/AKfycbwgLUz9w7x-if-KP5nrYV4WdP9e88SHHW2aKCnblomrPfgcxU_gkFU5944YNVcLJDgILA/exec";
 const KEY="sumaq_dulce_opiniones";
 const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function local(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return[]}}
